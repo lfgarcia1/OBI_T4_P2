@@ -41,7 +41,7 @@ try:
 		fde.addConstrs(z[k,i] <= d[i] for i in I)
 	fde.addConstrs(v[k] ==	(	 quicksum(c[j]*x[j] for j in J)
 								+quicksum((l[i]-q[i])*z[k,i] for i in I)
-								-quicksum(s[j]*y[k,j] for j in J)) for k in K)
+								-quicksum(s[j]*y[k,j] for j in J)	) for k in K)
 	fde.addConstr(u == quicksum(p[k]*v[k] for k in K))
 	fde.addConstrs(w[k] >= v[k]-u for k in K)
 
