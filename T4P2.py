@@ -52,7 +52,7 @@ try:
 	print("Valor Objetivo: ", fde.objVal)
 	# x solución fijo:
 	x_bar = [];
-	print('Solución x fijo: ')
+	print('Solución x fijo:')
 	for j in J:
 		print(x[j].varName, x[j].x)
 		x_bar.append(x[j].x)
