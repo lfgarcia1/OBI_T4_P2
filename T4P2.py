@@ -22,7 +22,6 @@ try:
 	l = numpy.random.randint(20,80,n)						# precio de adquisición del producto
 	q = 8*l													# precio de venta del producto
 	p = numpy.random.dirichlet(numpy.ones(k), size=1)[0]    # propapilidades de escenarios
-	rho = 0.5												# parámetro de función objetivo
 
 	# Modelo determinístico equivalente
 	fde = Model()
@@ -45,17 +44,22 @@ try:
 	fde.addConstr(u == quicksum(p[k]*v[k] for k in K))
 	fde.addConstrs(w[k] >= v[k]-u for k in K)
 
+	### Franex acá conviene hacer el for. Gurobi te deja usar el mismo modelo pero ir cambiandole la función objetivo
+	### y el código pa optimizar funciona igual
 	# Función objetivo
-	fde.setObjective(u+rho*quicksum(p[k]*w[k] for k in K), GRB.MINIMIZE)
-	# Solución:
-	fde.optimize()
-	print("Valor Objetivo: ", fde.objVal)
-	# x solución fijo:
-	x_bar = [];
-	print('Solución x fijo:')
-	for j in J:
-		print(x[j].varName, x[j].x)
-		x_bar.append(x[j].x)
+	rho = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]		# parámetro de función objetivo
+	for r in rho:
+		fde.setObjective(u+r*quicksum(p[k]*w[k] for k in K), GRB.MINIMIZE)
+		# Solución:
+		fde.optimize()
+		print("Valor Objetivo: ", fde.objVal)
+		# x solución fijo:
+		x_bar = [];
+		print('rho = ', r)
+		print('Solución x fijo:')
+		for j in J:
+			print(x[j].varName, x[j].x)
+			x_bar.append(x[j].x)					# óptimo
 
 except GurobiError:
 	print('Error reported')
