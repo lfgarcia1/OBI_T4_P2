@@ -74,10 +74,21 @@ try:
 	plt.text(-42000, 1600, r'$\rho = 0$')
 	plt.text(-40000, 350, r'$\rho = 20$')
 	plt.text(-31500, 100, r'$\rho = 100$')
-	plt.text(60, .025, r'$\mu=100,\ \sigma=15$')
 	plt.grid(True) 
 	plt.savefig("gráfico.png")
 	plt.savefig("gráfico.eps")
+	plt.show()
+
+	plt.plot(_u, _pi, color='red', marker='o', label=r'$\bar{v}_{N,M}$')
+	plt.xlabel(r'$E[Z]$')
+	plt.ylabel(r'$E[\max\{Z-E[Z],0\}$')
+	plt.title(r'Solución para diferentes $\rho$')
+	plt.text(-42000, 1600, r'$\rho = 0$')
+	plt.text(-40000, 350, r'$\rho = 20$')
+	plt.text(-31500, 100, r'$\rho = 100$')
+	plt.grid(True) 
+	plt.savefig("gráfico2.png")
+	plt.savefig("gráfico2.eps")
 	plt.show()
 
 except GurobiError:
