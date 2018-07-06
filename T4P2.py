@@ -31,6 +31,7 @@ try:
 	y = fde.addVars(K,J, name="y")				#  Cantidad de piezas a revender en cada escenario
 	# Variables auxiliares
 	w = fde.addVars(K, name="w")					#  Máximo entre F(x,\xi^k)-E[F(x,\xi)] y 0
+	pi = fde.addVar(name="pi")						#  Costo promedio del máximo entre F(x,\xi^k)-E[F(x,\xi)] y 0
 	v = fde.addVars(K, lb=-GRB.INFINITY, name="v")	#  Costo de F(x,\xi^k)	(variable sin restricción de signo)
 	u = fde.addVar(lb=-GRB.INFINITY, name="u")		#  Costo promedio E[F(x,\xi)]
 	# Restricciones
@@ -42,24 +43,42 @@ try:
 								+quicksum((l[i]-q[i])*z[k,i] for i in I)
 								-quicksum(s[j]*y[k,j] for j in J)	) for k in K)
 	fde.addConstr(u == quicksum(p[k]*v[k] for k in K))
+	fde.addConstr(pi == quicksum(p[k]*w[k] for k in K))
 	fde.addConstrs(w[k] >= v[k]-u for k in K)
-
-	### Franex acá conviene hacer el for. Gurobi te deja usar el mismo modelo pero ir cambiandole la función objetivo
-	### y el código pa optimizar funciona igual
+	_u = []
+	_pi = []
 	# Función objetivo
-	rho = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]		# parámetro de función objetivo
+	rho = numpy.linspace(0, 100, num=1000)		# parámetro de función objetivo
 	for r in rho:
-		fde.setObjective(u+r*quicksum(p[k]*w[k] for k in K), GRB.MINIMIZE)
+		fde.setObjective(u+r*pi, GRB.MINIMIZE)
 		# Solución:
 		fde.optimize()
 		print("Valor Objetivo: ", fde.objVal)
 		# x solución fijo:
 		x_bar = [];
 		print('rho = ', r)
+		print('u = ', u.x)
+		print('pi = ', pi.x)
+		_u.append(u.x)
+		_pi.append(pi.x)
 		print('Solución x fijo:')
 		for j in J:
 			print(x[j].varName, x[j].x)
 			x_bar.append(x[j].x)					# óptimo
+
+	# Gráfico de resultados
+	plt.plot(_u, _pi, color='red', label=r'$\bar{v}_{N,M}$')
+	plt.xlabel(r'$E[Z]$')
+	plt.ylabel(r'$E[\max\{Z-E[Z],0\}$')
+	plt.title(r'Solución para diferentes $\rho$')
+	plt.text(-42000, 1600, r'$\rho = 0$')
+	plt.text(-40000, 350, r'$\rho = 20$')
+	plt.text(-31500, 100, r'$\rho = 100$')
+	plt.text(60, .025, r'$\mu=100,\ \sigma=15$')
+	plt.grid(True) 
+	plt.savefig("gráfico.png")
+	plt.savefig("gráfico.eps")
+	plt.show()
 
 except GurobiError:
 	print('Error reported')
